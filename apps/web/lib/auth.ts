@@ -8,11 +8,39 @@ const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS ?? '')
   .map((e) => e.trim())
   .filter(Boolean)
 
+// Trusted origins for post-login redirects.
+// Covers prod + all Coolify preview subdomains (e.g. 8.agents-hub.betterdevelopers.dk).
+// Add extra origins via BETTER_AUTH_TRUSTED_ORIGINS (comma-separated).
+const TRUSTED_ORIGINS = [
+  'https://agents-hub.betterdevelopers.dk',
+  'https://auth.agents-hub.betterdevelopers.dk',
+  ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
+]
+
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL!, // must be https://auth.agents-hub.betterdevelopers.dk in prod
+
   session: {
     strategy: 'jwt',
     expiresIn: 60 * 60 * 24 * 30, // 30 days
     updateAge: 60 * 60 * 24,       // refresh if older than 1 day
+  },
+
+  advanced: {
+    // Cookie scoped to root domain so every *.betterdevelopers.dk subdomain
+    // (prod + all preview deployments) shares the same session.
+    defaultCookieAttributes: {
+      domain:   process.env.NODE_ENV === 'production' ? '.betterdevelopers.dk' : undefined,
+      sameSite: 'lax',
+      secure:   process.env.NODE_ENV === 'production',
+    },
+    // BetterAuth validates callbackURL against this list before redirecting.
+    // Preview URLs pass `window.location.origin` as callbackURL — add each one here
+    // or set BETTER_AUTH_TRUSTED_ORIGINS in Coolify with the preview origin.
+    trustedOrigins: TRUSTED_ORIGINS,
   },
 
   database: drizzleAdapter(db, {

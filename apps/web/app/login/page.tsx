@@ -1,12 +1,18 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { signIn } from '@/lib/auth-client'
 
 export default function LoginPage() {
+  const params = useSearchParams()
+  const callbackPath = params.get('callbackUrl') ?? '/board'
+
   const handleSignIn = async () => {
+    // Pass the full origin so BetterAuth redirects back to whichever
+    // preview URL (or prod) the user came from, not the auth domain.
     await signIn.social({
       provider: 'microsoft',
-      callbackURL: '/board',
+      callbackURL: `${window.location.origin}${callbackPath}`,
     })
   }
 

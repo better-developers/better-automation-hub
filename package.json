@@ -1,0 +1,12 @@
+{
+  "name": "better-automation-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd apps/web && npm install --frozen-lockfile && npm run build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
+    "start": "node apps/web/.next/standalone/server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["cd apps/web && npm install --frozen-lockfile"]
+
+[phases.build]
+cmds = [
+  "cd apps/web && npm run build",
+  "cp -r apps/web/public apps/web/.next/standalone/public",
+  "cp -r apps/web/.next/static apps/web/.next/standalone/.next/static"
+]
+
+[start]
+cmd = "node apps/web/.next/standalone/server.js"

@@ -17,6 +17,7 @@ export interface Card {
   summary: string | null
   status: string
   createdAt: string | Date
+  snoozedUntil: string | Date | null
 }
 
 export function CardItem({

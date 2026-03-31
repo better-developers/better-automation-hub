@@ -18,6 +18,12 @@ export function KanbanColumn({
   cards: Card[]
   onCardClick: (cardId: string) => void
 }) {
+  const now = new Date()
+  const visibleCards = cards.filter(
+    (c) => !c.snoozedUntil || new Date(c.snoozedUntil as string) < now
+  )
+  const snoozedCount = cards.length - visibleCards.length
+
   return (
     <div className="flex w-72 shrink-0 flex-col rounded-xl bg-muted/50 p-3">
       <div className="mb-3 flex items-center gap-2">
@@ -26,9 +32,16 @@ export function KanbanColumn({
           style={{ backgroundColor: category.color }}
         />
         <h2 className="text-sm font-semibold truncate">{category.name}</h2>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-          {cards.length}
-        </span>
+        <div className="ml-auto flex items-center gap-1.5">
+          {snoozedCount > 0 && (
+            <span className="text-xs rounded-full bg-orange-100 text-orange-700 px-1.5 py-0.5 font-medium">
+              {snoozedCount} snoozed
+            </span>
+          )}
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {visibleCards.length}
+          </span>
+        </div>
       </div>
       <Droppable droppableId={category.id}>
         {(provided, snapshot) => (
@@ -40,7 +53,7 @@ export function KanbanColumn({
               snapshot.isDraggingOver ? 'bg-muted' : '',
             ].join(' ')}
           >
-            {cards.map((card, index) => (
+            {visibleCards.map((card, index) => (
               <CardItem
                 key={card.id}
                 card={card}

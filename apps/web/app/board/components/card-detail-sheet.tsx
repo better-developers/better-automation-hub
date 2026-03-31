@@ -22,6 +22,7 @@ interface CardDetail {
   originalContent: Record<string, unknown> | string | null
   actionType: string | null
   actionMetadata: Record<string, unknown> | null
+  snoozedUntil: string | null
 }
 
 async function patchCard(id: string, body: Record<string, unknown>) {
@@ -48,10 +49,19 @@ async function postAction(body: {
   return res.json()
 }
 
+function defaultSnoozeValue() {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  d.setHours(9, 0, 0, 0)
+  return d.toISOString().slice(0, 16)
+}
+
 export function CardDetailSheet({ card }: { card: CardDetail }) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [draft, setDraft] = useState(card.draftReply ?? '')
+  const [showSnooze, setShowSnooze] = useState(false)
+  const [snoozeDate, setSnoozeDate] = useState(defaultSnoozeValue)
 
   const { mutate: updateCard } = useMutation({
     mutationFn: (body: Record<string, unknown>) => patchCard(card.id, body),
@@ -104,6 +114,29 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
     updateCard({ draft_reply: draft })
     sendAction()
   }
+
+  const handleSnooze = () => {
+    if (!snoozeDate) return
+    updateCard(
+      { snoozed_until: new Date(snoozeDate).toISOString() },
+      {
+        onSuccess: () => {
+          toast.success('Card snoozed')
+          router.back()
+        },
+      }
+    )
+  }
+
+  const handleUnsnooze = () => {
+    updateCard(
+      { snoozed_until: null },
+      { onSuccess: () => toast.success('Card unsnoozed') }
+    )
+  }
+
+  const isSnoozed =
+    card.snoozedUntil != null && new Date(card.snoozedUntil) > new Date()
 
   return (
     <Sheet open onOpenChange={(open) => !open && router.back()}>
@@ -161,10 +194,37 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
             <Button size="sm" onClick={handleMarkReviewed}>
               Mark reviewed
             </Button>
+            {isSnoozed ? (
+              <Button size="sm" variant="outline" onClick={handleUnsnooze}>
+                Unsnooze
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowSnooze((v) => !v)}
+              >
+                Snooze
+              </Button>
+            )}
             <Button size="sm" variant="destructive" onClick={handleDismiss}>
               Dismiss
             </Button>
           </div>
+
+          {showSnooze && !isSnoozed && (
+            <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-3">
+              <input
+                type="datetime-local"
+                value={snoozeDate}
+                onChange={(e) => setSnoozeDate(e.target.value)}
+                className="flex-1 rounded-md border px-2 py-1 text-sm bg-background"
+              />
+              <Button size="sm" onClick={handleSnooze} disabled={!snoozeDate}>
+                Confirm
+              </Button>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

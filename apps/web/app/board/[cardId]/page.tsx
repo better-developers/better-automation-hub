@@ -29,6 +29,7 @@ export default async function CardDetailPage({
         originalContent: card.originalContent as Record<string, unknown> | string | null,
         actionType:      card.actionType ?? null,
         actionMetadata:  card.actionMetadata as Record<string, unknown> | null,
+        snoozedUntil:    card.snoozedUntil ? card.snoozedUntil.toISOString() : null,
       }}
     />
   )

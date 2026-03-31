@@ -1,2 +1,2 @@
 [start]
-cmd = "node apps/web/node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts && node apps/web/.next/standalone/server.js"
+cmd = "cd apps/web && node_modules/.bin/drizzle-kit migrate && cd ../.. && node apps/web/.next/standalone/server.js"

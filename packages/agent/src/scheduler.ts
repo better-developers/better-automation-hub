@@ -2,6 +2,7 @@ import { db } from './db'
 import { triggers } from '../../../apps/web/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import cron from 'node-cron'
+import { runTrigger } from './trigger-runner'
 
 const USER_ID = process.env.AGENT_USER_ID!
 const RESYNC_INTERVAL_MS = 2 * 60 * 1000
@@ -12,11 +13,6 @@ interface ScheduledEntry {
 }
 
 const scheduledTasks = new Map<string, ScheduledEntry>()
-
-// Replaced in Phase 4 by the real trigger-runner import
-export async function runTrigger(triggerId: string): Promise<void> {
-  console.log(`[scheduler] trigger fired: ${triggerId}`)
-}
 
 async function syncTriggers(): Promise<void> {
   try {

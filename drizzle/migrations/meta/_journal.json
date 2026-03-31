@@ -15,6 +15,13 @@
       "when": 1774955055046,
       "tag": "0001_tranquil_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774955411282,
+      "tag": "0002_warm_gateway",
+      "breakpoints": true
     }
   ]
 }

@@ -68,6 +68,17 @@ export const authAccounts = pgTable('auth_accounts', {
   updatedAt:             timestamp('updated_at').notNull(),
 })
 
+export const authSessions = pgTable('auth_sessions', {
+  id:        text('id').primaryKey(),
+  userId:    text('user_id').notNull().references(() => authUsers.id, { onDelete: 'cascade' }),
+  token:     text('token').notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+})
+
 export const authVerifications = pgTable('auth_verifications', {
   id:         text('id').primaryKey(),
   identifier: text('identifier').notNull(),

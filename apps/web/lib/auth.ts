@@ -3,11 +3,6 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db/client'
 import * as schema from './db/schema'
 
-const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS ?? '')
-  .split(',')
-  .map((e) => e.trim())
-  .filter(Boolean)
-
 // Trusted origins for post-login redirects.
 // Covers prod + all Coolify preview subdomains (e.g. 8.agents-hub.betterdevelopers.dk).
 // Add extra origins via BETTER_AUTH_TRUSTED_ORIGINS (comma-separated).
@@ -55,7 +50,6 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    // No email verification — allowlist in signIn callback is the gate.
     requireEmailVerification: false,
   },
 
@@ -69,10 +63,6 @@ export const auth = betterAuth({
 
   callbacks: {
     async signIn({ user }: { user: { id: string; email?: string | null; name?: string | null } }) {
-      if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
-        return false
-      }
-
       // Upsert the app-level users row — id mirrors authUsers.id
       await db
         .insert(schema.users)

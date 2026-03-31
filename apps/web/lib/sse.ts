@@ -4,11 +4,7 @@ import { sseEvents } from './db/schema'
 export async function emitSseEvent(
   userId: string,
   eventType: string,
-  payload: unknown
+  payload: Record<string, unknown>,
 ): Promise<void> {
-  await db.insert(sseEvents).values({
-    userId,
-    eventType,
-    payload: payload as Record<string, unknown>,
-  })
+  await db.insert(sseEvents).values({ userId, eventType, payload })
 }

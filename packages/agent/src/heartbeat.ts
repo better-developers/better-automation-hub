@@ -1,42 +1,33 @@
 import { db } from './db'
 import { agentSessions } from '../../../apps/web/lib/db/schema'
-import { eq } from 'drizzle-orm'
 
-const HEARTBEAT_INTERVAL_MS = 30_000
+const USER_ID = process.env.AGENT_USER_ID!
+const ACTIVE_INTEGRATIONS = (process.env.ACTIVE_INTEGRATIONS ?? '').split(',').filter(Boolean)
+const INTERVAL_MS = 30_000
 
-const userId = process.env.AGENT_USER_ID!
-const activeIntegrations = (process.env.ACTIVE_INTEGRATIONS ?? '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean)
+export function startHeartbeat(): void {
+  async function beat() {
+    try {
+      await db
+        .insert(agentSessions)
+        .values({
+          userId: USER_ID,
+          lastSeen: new Date(),
+          integrations: ACTIVE_INTEGRATIONS,
+        })
+        .onConflictDoUpdate({
+          target: agentSessions.userId,
+          set: {
+            lastSeen: new Date(),
+            integrations: ACTIVE_INTEGRATIONS,
+          },
+        })
+    } catch (err) {
+      console.error('[heartbeat] failed:', err)
+    }
+  }
 
-async function upsertHeartbeat() {
-  await db
-    .insert(agentSessions)
-    .values({
-      userId,
-      lastSeen: new Date(),
-      integrations: activeIntegrations,
-    })
-    .onConflictDoUpdate({
-      target: agentSessions.userId,
-      set: {
-        lastSeen: new Date(),
-        integrations: activeIntegrations,
-      },
-    })
-}
-
-export function startHeartbeat() {
-  upsertHeartbeat().catch((err) =>
-    console.error('[heartbeat] initial upsert failed:', err)
-  )
-
-  setInterval(() => {
-    upsertHeartbeat().catch((err) =>
-      console.error('[heartbeat] upsert failed:', err)
-    )
-  }, HEARTBEAT_INTERVAL_MS)
-
-  console.log('[heartbeat] started — userId:', userId)
+  // Fire immediately, then on interval
+  beat()
+  setInterval(beat, INTERVAL_MS)
 }

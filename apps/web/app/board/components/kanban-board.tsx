@@ -28,21 +28,37 @@ export function KanbanBoard({
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const eventSourceRef = useRef<EventSource | null>(null)
+  const lastEventIdRef = useRef<number>(0)
 
+  // SSE subscription — invalidates cards cache on card_created / card_updated
   useEffect(() => {
-    const es = new EventSource('/api/sse')
-    eventSourceRef.current = es
+    let es: EventSource | null = null
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
 
-    const invalidateCards = () => {
-      queryClient.invalidateQueries({ queryKey: ['cards'] })
+    function connect() {
+      es = new EventSource(`/api/sse`)
+
+      const invalidate = (event: MessageEvent) => {
+        if (event.lastEventId) {
+          lastEventIdRef.current = parseInt(event.lastEventId, 10)
+        }
+        queryClient.invalidateQueries({ queryKey: ['cards'] })
+      }
+
+      es.addEventListener('card_created', invalidate)
+      es.addEventListener('card_updated', invalidate)
+
+      es.onerror = () => {
+        es?.close()
+        reconnectTimeout = setTimeout(connect, 3_000)
+      }
     }
 
-    es.addEventListener('card_created', invalidateCards)
-    es.addEventListener('card_updated', invalidateCards)
+    connect()
 
     return () => {
-      es.close()
+      es?.close()
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
     }
   }, [queryClient])
 

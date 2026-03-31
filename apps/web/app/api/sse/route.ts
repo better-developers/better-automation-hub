@@ -27,7 +27,11 @@ export async function GET(req: NextRequest) {
 
       const send = (data: string) => {
         if (!closed) {
-          controller.enqueue(encoder.encode(data))
+          try {
+            controller.enqueue(encoder.encode(data))
+          } catch {
+            closed = true
+          }
         }
       }
 
@@ -48,7 +52,7 @@ export async function GET(req: NextRequest) {
         send(': keep-alive\n\n')
       }, 25_000)
 
-      // Poll sse_events every 2s
+      // Poll sse_events every 2s, filtering by userId in SQL
       pollTimer = setInterval(async () => {
         if (closed) return
         try {
@@ -62,13 +66,14 @@ export async function GET(req: NextRequest) {
               )
             )
             .orderBy(sseEvents.id)
+            .limit(50)
 
           for (const row of rows) {
             send(`id: ${row.id}\nevent: ${row.eventType}\ndata: ${JSON.stringify(row.payload)}\n\n`)
             lastId = row.id
           }
         } catch {
-          // DB error — keep connection alive, will retry next poll
+          // DB errors shouldn't crash the stream
         }
       }, 2_000)
 

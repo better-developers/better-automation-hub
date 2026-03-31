@@ -14,7 +14,7 @@ interface ScheduledEntry {
 const scheduledTasks = new Map<string, ScheduledEntry>()
 
 // Replaced in Phase 4 by the real trigger-runner import
-async function runTrigger(triggerId: string): Promise<void> {
+export async function runTrigger(triggerId: string): Promise<void> {
   console.log(`[scheduler] trigger fired: ${triggerId}`)
 }
 

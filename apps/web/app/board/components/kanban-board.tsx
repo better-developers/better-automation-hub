@@ -3,6 +3,7 @@
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import { KanbanColumn, type Category } from './kanban-column'
 import { type Card } from './card-item'
 
@@ -27,6 +28,23 @@ export function KanbanBoard({
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const eventSourceRef = useRef<EventSource | null>(null)
+
+  useEffect(() => {
+    const es = new EventSource('/api/sse')
+    eventSourceRef.current = es
+
+    const invalidateCards = () => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+    }
+
+    es.addEventListener('card_created', invalidateCards)
+    es.addEventListener('card_updated', invalidateCards)
+
+    return () => {
+      es.close()
+    }
+  }, [queryClient])
 
   const { data: categories = initialCategories } = useQuery({
     queryKey: ['categories'],

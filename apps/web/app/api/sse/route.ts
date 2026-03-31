@@ -38,8 +38,9 @@ export async function GET(req: NextRequest) {
       // Send initial connection comment
       send(': connected\n\n')
 
-      let keepAliveTimer: ReturnType<typeof setInterval>
-      let pollTimer: ReturnType<typeof setInterval>
+      const keepAliveTimer = setInterval(() => {
+        send(': keep-alive\n\n')
+      }, 25_000)
 
       const cleanup = () => {
         closed = true
@@ -47,13 +48,8 @@ export async function GET(req: NextRequest) {
         clearInterval(pollTimer)
       }
 
-      // Keep-alive every 25s
-      keepAliveTimer = setInterval(() => {
-        send(': keep-alive\n\n')
-      }, 25_000)
-
       // Poll sse_events every 2s, filtering by userId in SQL
-      pollTimer = setInterval(async () => {
+      const pollTimer = setInterval(async () => {
         if (closed) return
         try {
           const rows = await db

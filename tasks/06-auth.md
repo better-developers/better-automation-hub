@@ -14,7 +14,7 @@
 ## Entra app registration (from scratch)
 
 1. Go to [portal.azure.com](https://portal.azure.com) → **Microsoft Entra ID** → **App registrations** → **New registration**
-2. **Name:** `Claude Automation Hub`
+2. **Name:** `Better Automation Hub`
 3. **Supported account types:** `Accounts in any organizational directory and personal Microsoft accounts` ← multi-tenant
 4. **Redirect URI:**
    - Platform: **Web**

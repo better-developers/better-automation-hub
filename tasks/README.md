@@ -1,4 +1,4 @@
-# Claude Automation Hub — Implementation Plan
+# Better Automation Hub — Implementation Plan
 
 A personal automation system with a hosted Kanban UI, a self-hosted Postgres database, and a local Claude agent that executes tasks using MCP servers.
 

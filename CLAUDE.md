@@ -1,4 +1,4 @@
-# CLAUDE.md — Claude Automation Hub
+# CLAUDE.md — Better Automation Hub
 
 Personal automation system: a hosted Kanban UI where cards are created automatically by a local Claude agent that monitors Outlook, Teams, and GitHub via MCP servers.
 

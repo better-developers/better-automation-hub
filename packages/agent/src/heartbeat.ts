@@ -5,7 +5,7 @@ const USER_ID = process.env.AGENT_USER_ID!
 const ACTIVE_INTEGRATIONS = (process.env.ACTIVE_INTEGRATIONS ?? '').split(',').filter(Boolean)
 const INTERVAL_MS = 30_000
 
-export function startHeartbeat(): void {
+export function startHeartbeat(): ReturnType<typeof setInterval> {
   async function beat() {
     try {
       await db
@@ -29,5 +29,5 @@ export function startHeartbeat(): void {
 
   // Fire immediately, then on interval
   beat()
-  setInterval(beat, INTERVAL_MS)
+  return setInterval(beat, INTERVAL_MS)
 }

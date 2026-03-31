@@ -8,6 +8,13 @@
       "when": 1774954051266,
       "tag": "0000_shallow_frog_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774955055046,
+      "tag": "0001_tranquil_ma_gnuci",
+      "breakpoints": true
     }
   ]
 }

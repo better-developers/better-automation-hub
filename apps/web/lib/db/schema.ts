@@ -68,6 +68,15 @@ export const authAccounts = pgTable('auth_accounts', {
   updatedAt:             timestamp('updated_at').notNull(),
 })
 
+export const authVerifications = pgTable('auth_verifications', {
+  id:         text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value:      text('value').notNull(),
+  expiresAt:  timestamp('expires_at').notNull(),
+  createdAt:  timestamp('created_at'),
+  updatedAt:  timestamp('updated_at'),
+})
+
 // ---------------------------------------------------------------------------
 // App tables
 // users.id mirrors authUsers.id — same text (cuid2) value

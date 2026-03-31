@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { getSessionFromRequest } from './lib/session'
 
 const PUBLIC_PATHS = ['/login', '/api/auth']
 
@@ -14,9 +14,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  const session = await auth.api.getSession({ headers: req.headers })
+  const session = await getSessionFromRequest(req)
 
-  if (!session?.user) {
+  if (!session) {
     const loginUrl = new URL('/login', req.url)
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)

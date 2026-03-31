@@ -21,7 +21,7 @@ const TRUSTED_ORIGINS = [
 ]
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL!, // must be https://auth.agents-hub.betterdevelopers.dk in prod
+  baseURL: process.env.BETTER_AUTH_URL!, // https://agents-hub.betterdevelopers.dk in prod
 
   session: {
     strategy: 'jwt',
@@ -52,6 +52,12 @@ export const auth = betterAuth({
       verification: schema.authVerifications,
     },
   }),
+
+  emailAndPassword: {
+    enabled: true,
+    // No email verification — allowlist in signIn callback is the gate.
+    requireEmailVerification: false,
+  },
 
   socialProviders: {
     microsoft: {

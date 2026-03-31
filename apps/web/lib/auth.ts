@@ -32,7 +32,7 @@ export const auth = betterAuth({
   },
 
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user }: { user: { id: string; email?: string | null; name?: string | null } }) {
       if (!ALLOWED_EMAILS.includes(user.email ?? '')) {
         return false
       }

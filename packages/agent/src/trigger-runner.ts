@@ -18,8 +18,9 @@ const USER_ID = process.env.AGENT_USER_ID!
 
 export interface Integration {
   fetchNew(trigger: typeof triggers.$inferSelect): Promise<FetchedItem[]>
+  execute(payload: Record<string, unknown>): Promise<void>
   mcpServers: McpServerConfig[]
-  actionType: string
+  actionType: string  // 'reply_email' | 'reply_teams' | 'reply_github'
 }
 
 // ---------------------------------------------------------------------------
@@ -31,6 +32,16 @@ const registry = new Map<string, Integration>()
 export function registerIntegration(name: string, integration: Integration): void {
   registry.set(name, integration)
   console.log(`[trigger-runner] registered integration "${name}"`)
+}
+
+/** Look up a registered integration by its actionType (e.g. 'reply_email'). */
+export function getIntegration(actionType: string): Integration | undefined {
+  for (const integration of registry.values()) {
+    if (integration.actionType === actionType) {
+      return integration
+    }
+  }
+  return undefined
 }
 
 // ---------------------------------------------------------------------------

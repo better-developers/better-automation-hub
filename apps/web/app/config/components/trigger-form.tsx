@@ -207,7 +207,7 @@ export function TriggerForm({
           {/* Schedule */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Schedule</label>
-            <Select value={preset} onValueChange={handlePresetChange}>
+            <Select value={preset} onValueChange={(v) => v && handlePresetChange(v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {SCHEDULE_PRESETS.map((p) => (

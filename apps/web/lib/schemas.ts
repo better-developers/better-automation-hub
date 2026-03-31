@@ -30,7 +30,7 @@ export const PatchCardSchema = z.object({
 export const CreateActionSchema = z.object({
   card_id:     z.string().uuid(),
   action_type: z.string().min(1),
-  payload:     z.record(z.unknown()),
+  payload:     z.record(z.string(), z.unknown()),
 })
 
 export const CreateTriggerSchema = z.object({
@@ -39,7 +39,7 @@ export const CreateTriggerSchema = z.object({
   category_id:        z.string().uuid(),
   schedule:           z.string().min(1),
   prompt_template:    z.string().min(1),
-  integration_config: z.record(z.unknown()).optional(),
+  integration_config: z.record(z.string(), z.unknown()).optional(),
   enabled:            z.boolean().optional(),
 })
 
@@ -49,6 +49,6 @@ export const PatchTriggerSchema = z.object({
   category_id:        z.string().uuid().optional(),
   schedule:           z.string().min(1).optional(),
   prompt_template:    z.string().min(1).optional(),
-  integration_config: z.record(z.unknown()).optional(),
+  integration_config: z.record(z.string(), z.unknown()).optional(),
   enabled:            z.boolean().optional(),
 })

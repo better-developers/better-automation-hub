@@ -23,6 +23,7 @@ interface CardDetail {
   actionType: string | null
   actionMetadata: Record<string, unknown> | null
   snoozedUntil: string | null
+  actionError: string | null
 }
 
 async function patchCard(id: string, body: Record<string, unknown>) {
@@ -78,7 +79,7 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards'] })
-      toast.success('Reply sent — card queued for sending')
+      toast.success('Reply sent \u2014 card queued for sending')
       router.back()
     },
     onError: () => toast.error('Failed to send reply'),
@@ -148,6 +149,13 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
         </SheetHeader>
 
         <div className="mt-4 space-y-4">
+          {card.actionError && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3">
+              <p className="text-xs font-semibold text-red-700 mb-1">Action failed</p>
+              <p className="text-xs text-red-600 break-words">{card.actionError}</p>
+            </div>
+          )}
+
           {card.summary && (
             <p className="text-sm text-muted-foreground">{card.summary}</p>
           )}

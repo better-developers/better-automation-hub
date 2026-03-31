@@ -1,8 +1,8 @@
-import { eq, and } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { requireSession } from '@/lib/auth-guard'
 import { db } from '@/lib/db/client'
-import { cards } from '@/lib/db/schema'
+import { cards, actionQueue } from '@/lib/db/schema'
 import { CardDetailSheet } from '../components/card-detail-sheet'
 
 export default async function CardDetailPage({
@@ -18,6 +18,23 @@ export default async function CardDetailPage({
 
   if (!card) notFound()
 
+  // Surface the most recent failed action error (only relevant when card is pending)
+  let actionError: string | null = null
+  if (card.status === 'pending') {
+    const [failedAction] = await db
+      .select({ error: actionQueue.error })
+      .from(actionQueue)
+      .where(
+        and(
+          eq(actionQueue.cardId, card.id),
+          eq(actionQueue.status, 'failed'),
+        ),
+      )
+      .orderBy(desc(actionQueue.processedAt))
+      .limit(1)
+    actionError = failedAction?.error ?? null
+  }
+
   return (
     <CardDetailSheet
       card={{
@@ -30,6 +47,7 @@ export default async function CardDetailPage({
         actionType:      card.actionType ?? null,
         actionMetadata:  card.actionMetadata as Record<string, unknown> | null,
         snoozedUntil:    card.snoozedUntil ? card.snoozedUntil.toISOString() : null,
+        actionError,
       }}
     />
   )

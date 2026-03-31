@@ -53,6 +53,13 @@ export function KanbanColumn({
               snapshot.isDraggingOver ? 'bg-muted' : '',
             ].join(' ')}
           >
+            {visibleCards.length === 0 && !snapshot.isDraggingOver && (
+              <div className="flex flex-col items-center justify-center py-8 px-3 text-center">
+                <p className="text-xs text-muted-foreground">
+                  No cards yet &mdash; triggers will populate this
+                </p>
+              </div>
+            )}
             {visibleCards.map((card, index) => (
               <CardItem
                 key={card.id}

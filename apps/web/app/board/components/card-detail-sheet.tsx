@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   Sheet,
   SheetContent,
@@ -55,6 +56,7 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
   const { mutate: updateCard } = useMutation({
     mutationFn: (body: Record<string, unknown>) => patchCard(card.id, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+    onError: () => toast.error('Failed to update card'),
   })
 
   const { mutate: sendAction, isPending: isSending } = useMutation({
@@ -66,26 +68,39 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards'] })
+      toast.success('Reply sent — card queued for sending')
       router.back()
     },
+    onError: () => toast.error('Failed to send reply'),
   })
 
   const handleDismiss = () => {
-    updateCard({ status: 'dismissed' })
-    router.back()
+    updateCard(
+      { status: 'dismissed' },
+      {
+        onSuccess: () => {
+          toast.success('Card dismissed')
+          router.back()
+        },
+      }
+    )
   }
 
   const handleMarkReviewed = () => {
-    updateCard({ status: 'reviewed', draft_reply: draft })
-    router.back()
+    updateCard(
+      { status: 'reviewed', draft_reply: draft },
+      { onSuccess: () => router.back() }
+    )
   }
 
   const handleSaveDraft = () => {
-    updateCard({ draft_reply: draft })
+    updateCard(
+      { draft_reply: draft },
+      { onSuccess: () => toast.success('Draft saved') }
+    )
   }
 
   const handleSend = () => {
-    // Save latest draft before sending
     updateCard({ draft_reply: draft })
     sendAction()
   }

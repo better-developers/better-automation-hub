@@ -1,2 +1,2 @@
 [start]
-cmd = "node apps/web/.next/standalone/server.js"
+cmd = "npx drizzle-kit migrate && node apps/web/.next/standalone/server.js"

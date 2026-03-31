@@ -25,7 +25,7 @@ export function KanbanColumn({
   const snoozedCount = cards.length - visibleCards.length
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl bg-muted/50 p-3">
+    <div className="flex w-full md:w-72 md:shrink-0 flex-col rounded-xl bg-muted/50 p-3">
       <div className="mb-3 flex items-center gap-2">
         <div
           className="h-3 w-3 rounded-full shrink-0"

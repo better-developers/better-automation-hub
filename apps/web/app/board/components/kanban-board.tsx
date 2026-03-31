@@ -108,7 +108,7 @@ export function KanbanBoard({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-4 px-1">
+      <div className="flex flex-col gap-4 md:flex-row md:overflow-x-auto pb-4 px-1">
         {categories.map((category) => (
           <KanbanColumn
             key={category.id}

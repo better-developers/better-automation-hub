@@ -140,7 +140,7 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
 
   return (
     <Sheet open onOpenChange={(open) => !open && router.back()}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-xl h-[100dvh] sm:h-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-base leading-snug pr-6">
             {card.title}

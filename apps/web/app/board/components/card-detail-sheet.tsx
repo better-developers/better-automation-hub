@@ -19,6 +19,8 @@ interface CardDetail {
   draftReply: string | null
   status: string
   originalContent: Record<string, unknown> | string | null
+  actionType: string | null
+  actionMetadata: Record<string, unknown> | null
 }
 
 async function patchCard(id: string, body: Record<string, unknown>) {
@@ -31,6 +33,20 @@ async function patchCard(id: string, body: Record<string, unknown>) {
   return res.json()
 }
 
+async function postAction(body: {
+  card_id: string
+  action_type: string
+  payload: Record<string, unknown>
+}) {
+  const res = await fetch('/api/actions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error('Failed to queue action')
+  return res.json()
+}
+
 export function CardDetailSheet({ card }: { card: CardDetail }) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -39,6 +55,19 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
   const { mutate: updateCard } = useMutation({
     mutationFn: (body: Record<string, unknown>) => patchCard(card.id, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  })
+
+  const { mutate: sendAction, isPending: isSending } = useMutation({
+    mutationFn: () =>
+      postAction({
+        card_id:     card.id,
+        action_type: card.actionType!,
+        payload:     { ...(card.actionMetadata ?? {}), draft_reply: draft },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+      router.back()
+    },
   })
 
   const handleDismiss = () => {
@@ -53,6 +82,12 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
 
   const handleSaveDraft = () => {
     updateCard({ draft_reply: draft })
+  }
+
+  const handleSend = () => {
+    // Save latest draft before sending
+    updateCard({ draft_reply: draft })
+    sendAction()
   }
 
   return (
@@ -96,6 +131,15 @@ export function CardDetailSheet({ card }: { card: CardDetail }) {
           </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
+            {card.actionType && (
+              <Button
+                size="sm"
+                onClick={handleSend}
+                disabled={isSending || !draft.trim()}
+              >
+                {isSending ? 'Sending…' : 'Send'}
+              </Button>
+            )}
             <Button size="sm" variant="outline" onClick={handleSaveDraft}>
               Save draft
             </Button>

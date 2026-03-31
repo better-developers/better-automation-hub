@@ -30,7 +30,7 @@ export function KanbanBoard({
   const queryClient = useQueryClient()
   const lastEventIdRef = useRef<number>(0)
 
-  // SSE subscription — invalidates cards cache on card_created / card_updated
+  // SSE subscription — invalidates cards cache on card.created / card.updated
   useEffect(() => {
     let es: EventSource | null = null
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
@@ -45,8 +45,9 @@ export function KanbanBoard({
         queryClient.invalidateQueries({ queryKey: ['cards'] })
       }
 
-      es.addEventListener('card_created', invalidate)
-      es.addEventListener('card_updated', invalidate)
+      // Event names must match what the agent/API emits: dot notation
+      es.addEventListener('card.created', invalidate)
+      es.addEventListener('card.updated', invalidate)
 
       es.onerror = () => {
         es?.close()

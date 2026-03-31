@@ -27,6 +27,8 @@ export default async function CardDetailPage({
         draftReply:      card.draftReply ?? null,
         status:          card.status,
         originalContent: card.originalContent as Record<string, unknown> | string | null,
+        actionType:      card.actionType ?? null,
+        actionMetadata:  card.actionMetadata as Record<string, unknown> | null,
       }}
     />
   )

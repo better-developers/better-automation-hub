@@ -26,3 +26,23 @@ export const PatchCardSchema = z.object({
   draft_reply:   z.string().optional(),
   snoozed_until: z.string().datetime().nullable().optional(),
 })
+
+export const CreateTriggerSchema = z.object({
+  name:               z.string().min(1).max(200),
+  integration:        z.enum(['outlook', 'teams', 'github']),
+  category_id:        z.string().uuid(),
+  schedule:           z.string().min(1),
+  prompt_template:    z.string().min(1),
+  integration_config: z.record(z.unknown()).optional(),
+  enabled:            z.boolean().optional(),
+})
+
+export const PatchTriggerSchema = z.object({
+  name:               z.string().min(1).max(200).optional(),
+  integration:        z.enum(['outlook', 'teams', 'github']).optional(),
+  category_id:        z.string().uuid().optional(),
+  schedule:           z.string().min(1).optional(),
+  prompt_template:    z.string().min(1).optional(),
+  integration_config: z.record(z.unknown()).optional(),
+  enabled:            z.boolean().optional(),
+})

@@ -3,6 +3,7 @@
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import { KanbanColumn, type Category } from './kanban-column'
 import { type Card } from './card-item'
 
@@ -27,6 +28,42 @@ export function KanbanBoard({
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const lastEventIdRef = useRef<number>(0)
+
+  // SSE subscription — invalidates cards cache on card_created / card_updated
+  useEffect(() => {
+    let es: EventSource | null = null
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
+
+    function connect() {
+      const url = lastEventIdRef.current
+        ? `/api/sse`
+        : `/api/sse`
+      es = new EventSource(url)
+
+      const invalidate = (event: MessageEvent) => {
+        if (event.lastEventId) {
+          lastEventIdRef.current = parseInt(event.lastEventId, 10)
+        }
+        queryClient.invalidateQueries({ queryKey: ['cards'] })
+      }
+
+      es.addEventListener('card_created', invalidate)
+      es.addEventListener('card_updated', invalidate)
+
+      es.onerror = () => {
+        es?.close()
+        reconnectTimeout = setTimeout(connect, 3_000)
+      }
+    }
+
+    connect()
+
+    return () => {
+      es?.close()
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
+    }
+  }, [queryClient])
 
   const { data: categories = initialCategories } = useQuery({
     queryKey: ['categories'],

@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { eq } from 'drizzle-orm'
 import { db } from './db/client'
 import * as schema from './db/schema'
 
@@ -75,6 +76,21 @@ export const auth = betterAuth({
           target: schema.users.id,
           set:    { name: user.name ?? '' },
         })
+
+      // Seed default categories if the user has none yet
+      const existing = await db
+        .select({ id: schema.categories.id })
+        .from(schema.categories)
+        .where(eq(schema.categories.userId, user.id))
+        .limit(1)
+
+      if (existing.length === 0) {
+        await db.insert(schema.categories).values([
+          { userId: user.id, name: 'Inbox',       color: '#3b82f6', position: 0 },
+          { userId: user.id, name: 'In Progress',  color: '#f59e0b', position: 1 },
+          { userId: user.id, name: 'Done',         color: '#22c55e', position: 2 },
+        ])
+      }
 
       return true
     },

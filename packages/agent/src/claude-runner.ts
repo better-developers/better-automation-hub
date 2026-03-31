@@ -22,6 +22,7 @@ export interface ClaudeResult {
   title: string
   reply: string
   summary: string
+  external_id?: string  // returned by Claude for per-item deduplication in batch responses
 }
 
 type Trigger = typeof triggers.$inferSelect
@@ -61,10 +62,11 @@ function extractJson(text: string): unknown {
   return null
 }
 
-function normaliseResult(parsed: unknown): ClaudeResult | null {
-  // Support both a single object and an array (batch trigger response)
-  const item = Array.isArray(parsed) ? parsed[0] : parsed
-
+/**
+ * Normalise a single parsed item (object) into a ClaudeResult.
+ * Returns null if the item is not a valid result shape.
+ */
+function normaliseOne(item: unknown): ClaudeResult | null {
   if (item && typeof item === 'object') {
     const r = item as Record<string, unknown>
     if (typeof r.title === 'string') {
@@ -72,11 +74,31 @@ function normaliseResult(parsed: unknown): ClaudeResult | null {
         title: r.title,
         reply: typeof r.reply === 'string' ? r.reply : '',
         summary: typeof r.summary === 'string' ? r.summary : '',
+        // Capture external_id when Claude includes it (batch / per-item dedup)
+        external_id: typeof r.external_id === 'string' ? r.external_id : undefined,
       }
     }
   }
-
   return null
+}
+
+/**
+ * Normalise a parsed JSON value into a single ClaudeResult.
+ * When Claude returns an array (batch trigger), the first element is used.
+ */
+function normaliseResult(parsed: unknown): ClaudeResult | null {
+  const item = Array.isArray(parsed) ? parsed[0] : parsed
+  return normaliseOne(item)
+}
+
+/**
+ * Normalise a parsed JSON value into ALL ClaudeResults.
+ * Handles both single-object and array responses from Claude.
+ * Used when a batch trigger expects Claude to return one result per input item.
+ */
+export function normaliseAllResults(parsed: unknown): ClaudeResult[] {
+  const items = Array.isArray(parsed) ? parsed : [parsed]
+  return items.map(normaliseOne).filter((r): r is ClaudeResult => r !== null)
 }
 
 // ---------------------------------------------------------------------------

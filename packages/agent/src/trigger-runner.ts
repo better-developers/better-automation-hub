@@ -87,7 +87,7 @@ async function runTriggerWithIntegration(
     return
   }
 
-  // 2. Filter already-processed external IDs
+  // 2. Filter already-processed external IDs (using the integration-provided externalId)
   const externalIds = items.map((i) => i.externalId)
 
   const already = await db
@@ -113,6 +113,19 @@ async function runTriggerWithIntegration(
     try {
       const result = await runClaude(trigger, item, integration.mcpServers)
 
+      // Prefer the external_id returned by Claude (present in batch JSON responses);
+      // fall back to the integration-provided externalId for deduplication.
+      const dedupKey = result.external_id ?? item.externalId
+
+      // Guard against a race where the same item was processed concurrently
+      // (e.g. Claude returned a different external_id that was already stored).
+      if (processedSet.has(dedupKey)) {
+        console.log(
+          `[trigger-runner] skipping "${result.title}" — external_id "${dedupKey}" already processed`,
+        )
+        continue
+      }
+
       // Insert card
       const [card] = await db
         .insert(cards)
@@ -137,17 +150,23 @@ async function runTriggerWithIntegration(
         payload: { cardId: card.id, triggerId: trigger.id },
       })
 
-      // Mark as processed — onConflictDoNothing guards against race conditions
+      // Mark as processed using the dedup key (Claude's external_id if provided,
+      // otherwise the integration's externalId). onConflictDoNothing guards against races.
       await db
         .insert(processedItems)
         .values({
           userId: USER_ID,
           integration: trigger.integration,
-          externalId: item.externalId,
+          externalId: dedupKey,
         })
         .onConflictDoNothing()
 
-      console.log(`[trigger-runner] created card "${result.title}" (externalId: ${item.externalId})`)
+      // Track in local set so subsequent items in the same run are also deduplicated.
+      processedSet.add(dedupKey)
+
+      console.log(
+        `[trigger-runner] created card "${result.title}" (dedupKey: ${dedupKey})`,
+      )
     } catch (err) {
       console.error(`[trigger-runner] error processing item ${item.externalId}:`, err)
       // Continue with remaining items rather than aborting the whole run

@@ -186,7 +186,7 @@ export function TriggerForm({
           {/* Category */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Category</label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select value={categoryId} onValueChange={(v) => v && setCategoryId(v)}>
               <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (

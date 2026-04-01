@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { startHeartbeat } from './heartbeat'
 import { startScheduler } from './scheduler'
+import { startSseCleanup } from './sse-cleanup'
 import { startActionWatcher, cleanupStuckActions } from './action-watcher'
 import { initIntegrations } from './integrations'
 
@@ -14,6 +15,7 @@ console.log('[agent] heartbeat started')
 cleanupStuckActions().catch((err) => console.error('[agent] startup cleanup error:', err))
 
 startScheduler()
+startSseCleanup()
 startActionWatcher()
 
 process.on('SIGINT', () => {

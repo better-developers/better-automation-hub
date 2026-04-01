@@ -17,6 +17,8 @@ export interface Card {
   summary: string | null
   status: string
   createdAt: string | Date
+  snoozedUntil: string | Date | null
+  action_error?: string | null
 }
 
 export function CardItem({
@@ -40,6 +42,7 @@ export function CardItem({
             'rounded-lg border bg-card p-3 shadow-sm cursor-pointer',
             'hover:shadow-md transition-shadow select-none',
             snapshot.isDragging ? 'shadow-lg rotate-1 opacity-90' : '',
+            card.action_error ? 'border-red-300' : '',
           ].join(' ')}
         >
           <p className="text-sm font-medium line-clamp-2 leading-snug">
@@ -50,12 +53,17 @@ export function CardItem({
               {card.summary}
             </p>
           )}
-          <div className="mt-2">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             <span
               className={`text-xs rounded-full px-2 py-0.5 font-medium ${STATUS_COLORS[card.status] ?? 'bg-gray-100 text-gray-800'}`}
             >
               {card.status}
             </span>
+            {card.action_error && (
+              <span className="text-xs rounded-full px-2 py-0.5 font-medium bg-red-100 text-red-700">
+                Action failed
+              </span>
+            )}
           </div>
         </div>
       )}

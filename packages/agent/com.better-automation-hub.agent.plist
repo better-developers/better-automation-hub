@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS launchd plist for Better Automation Hub agent.
+
+  Install (runs on login for current user):
+    cp packages/agent/com.better-automation-hub.agent.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.better-automation-hub.agent.plist
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.better-automation-hub.agent.plist
+    rm ~/Library/LaunchAgents/com.better-automation-hub.agent.plist
+
+  Before installing, update WorkingDirectory and the PATH value to match your
+  machine (run `which node` and `which tsx` to verify the paths).
+-->
+<plist version="1.0">
+<dict>
+  <!-- Service identifier — must match filename -->
+  <key>Label</key>
+  <string>com.better-automation-hub.agent</string>
+
+  <!-- Command to run: tsx src/index.ts inside the agent package -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/tsx</string>
+    <string>src/index.ts</string>
+  </array>
+
+  <!-- Set this to the absolute path of packages/agent on your machine -->
+  <key>WorkingDirectory</key>
+  <string>/Users/REPLACE_WITH_YOUR_USERNAME/better-automation-hub/packages/agent</string>
+
+  <!-- Ensure node/tsx are on PATH -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+  </dict>
+
+  <!-- Start automatically when the user logs in -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Restart automatically if the process exits -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <!-- Wait 10 seconds before restarting after a crash -->
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <!-- Log stdout and stderr to ~/Library/Logs/ -->
+  <key>StandardOutPath</key>
+  <string>/Users/REPLACE_WITH_YOUR_USERNAME/Library/Logs/better-automation-hub-agent.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/REPLACE_WITH_YOUR_USERNAME/Library/Logs/better-automation-hub-agent.error.log</string>
+</dict>
+</plist>

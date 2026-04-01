@@ -27,7 +27,11 @@ export default async function ConfigPage() {
         <h1 className="text-lg font-semibold">Config</h1>
       </header>
       <div className="flex-1 p-6">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="rounded-lg border bg-muted/40 px-4 py-3">
+            <p className="text-xs text-muted-foreground mb-1">AGENT_USER_ID</p>
+            <p className="font-mono text-sm select-all">{userId}</p>
+          </div>
           <ConfigTabs
             initialCategories={cats as unknown as Category[]}
             initialTriggers={trigs as unknown as Trigger[]}

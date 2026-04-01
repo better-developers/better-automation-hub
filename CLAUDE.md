@@ -324,12 +324,21 @@ ALLOWED_EMAILS=casper@betterdevelopers.dk
 ### `packages/agent/.env`
 ```env
 DATABASE_URL=postgresql://user:password@vps.yourdomain.com:5432/automation_hub
-ANTHROPIC_API_KEY=sk-ant-...
 AGENT_USER_ID=<uuid from users table — set after first login>
 ACTIVE_INTEGRATIONS=outlook,teams,github
 GITHUB_TOKEN=github_pat_...
 MS365_MCP_URL=https://your-tunnel.yourdomain.com/mcp
 GITHUB_MCP_URL=https://...
+
+# --- Claude authentication: choose ONE of the two options below ---
+
+# Option A: Anthropic API key (pay-per-use, required for full MCP beta support)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Option B: Claude Code subscription (uses your claude.ai Pro/Max plan, no API key needed)
+# Requires Claude Code CLI to be installed and logged in: npm install -g @anthropic-ai/claude-code && claude login
+# MCP servers are supported via --mcp-config (passed automatically by the agent)
+# CLAUDE_USE_SUBSCRIPTION=true
 ```
 
 ---

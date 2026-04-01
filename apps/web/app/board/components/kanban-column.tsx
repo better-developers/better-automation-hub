@@ -2,6 +2,7 @@
 
 import { Droppable } from '@hello-pangea/dnd'
 import { CardItem, type Card } from './card-item'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export interface Category {
   id: string
@@ -13,10 +14,12 @@ export function KanbanColumn({
   category,
   cards,
   onCardClick,
+  isLoading = false,
 }: {
   category: Category
   cards: Card[]
   onCardClick: (cardId: string) => void
+  isLoading?: boolean
 }) {
   const now = new Date()
   const visibleCards = cards.filter(
@@ -39,7 +42,7 @@ export function KanbanColumn({
             </span>
           )}
           <span className="text-xs text-muted-foreground tabular-nums">
-            {visibleCards.length}
+            {isLoading ? '…' : visibleCards.length}
           </span>
         </div>
       </div>
@@ -53,21 +56,31 @@ export function KanbanColumn({
               snapshot.isDraggingOver ? 'bg-muted' : '',
             ].join(' ')}
           >
-            {visibleCards.length === 0 && !snapshot.isDraggingOver && (
-              <div className="flex flex-col items-center justify-center py-8 px-3 text-center">
-                <p className="text-xs text-muted-foreground">
-                  No cards yet &mdash; triggers will populate this
-                </p>
-              </div>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </>
+            ) : (
+              <>
+                {visibleCards.length === 0 && !snapshot.isDraggingOver && (
+                  <div className="flex flex-col items-center justify-center py-8 px-3 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      No cards yet &mdash; triggers will populate this
+                    </p>
+                  </div>
+                )}
+                {visibleCards.map((card, index) => (
+                  <CardItem
+                    key={card.id}
+                    card={card}
+                    index={index}
+                    onClick={() => onCardClick(card.id)}
+                  />
+                ))}
+              </>
             )}
-            {visibleCards.map((card, index) => (
-              <CardItem
-                key={card.id}
-                card={card}
-                index={index}
-                onClick={() => onCardClick(card.id)}
-              />
-            ))}
             {provided.placeholder}
           </div>
         )}

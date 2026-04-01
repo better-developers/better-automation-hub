@@ -69,7 +69,7 @@ export function KanbanBoard({
     initialData: initialCategories,
   })
 
-  const { data: cards = initialCards } = useQuery({
+  const { data: cards = initialCards, isFetching: cardsFetching } = useQuery({
     queryKey: ['cards'],
     queryFn: fetchCards,
     initialData: initialCards,
@@ -115,6 +115,7 @@ export function KanbanBoard({
             category={category}
             cards={cards.filter((c) => (c as unknown as { categoryId: string }).categoryId === category.id)}
             onCardClick={(cardId) => router.push(`/board/${cardId}`)}
+            isLoading={cardsFetching && cards.length === 0}
           />
         ))}
         {categories.length === 0 && (
